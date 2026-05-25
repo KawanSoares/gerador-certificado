@@ -1,0 +1,20 @@
+{
+  "curso_nome": "Segurança Digital",
+  "data_curso": "17/05/2026",
+  "carga_horaria": "2 (duas) horas",
+
+  "professor1_nome": "",
+  "professor1_cargo": "",
+  "professor1_cpf": "",
+
+  "professor2_nome": "",
+  "professor2_cargo": "",
+  "professor2_cpf": "",
+
+  "emissor_nome": "Movimento Luta de Classes",
+  "emissor_local": "Florianópolis / SC",
+  "data_emissao": "17.05.2026",
+
+  "ano_certificado": 2026,
+  "numero_inicial": 1
+}

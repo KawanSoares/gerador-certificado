@@ -1,0 +1,348 @@
+<!doctype html>
+<!--
+  Template Jinja2 — Certificado Núcleo TI / MLC
+  Renderize com Python (jinja2). Variáveis esperadas:
+
+    aluno_nome             "Camarada Joana da Silva Pereira"
+    curso_nome             "Segurança Digital para Militantes e Organizações Populares"
+    data_curso             "17/05/2026"
+    carga_horaria          "40 (quarenta) horas"
+
+    professor1_nome        "Rodrigo Vasquez"
+    professor1_cargo       "COORD. NÚCLEO TI · MLC"
+    professor1_cpf         "000.000.000-00"
+
+    professor2_nome        "Ana Beatriz Lima"
+    professor2_cargo       "INSTRUTORA · NÚCLEO TI"
+    professor2_cpf         "000.000.000-00"
+
+    certificado_numero     "2026/001"
+    qr_code_src            "data:image/png;base64,…" ou "qr/2026-001.png"
+
+    emissor_nome           "Movimento Luta de Classes"
+    emissor_local          "São Paulo / SP"
+    data_emissao           "18.05.2026"
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Certificado · Segurança Digital · Núcleo TI / MLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a09;
+    --ink:#d8efde;
+    --ink-dim:#6f8a78;
+    --ink-mute:#3a4f44;
+    --green:#3ee07a;
+    --green-soft:#1f8a4a;
+    --red:#e3000a;
+    --rule:rgba(62,224,122,.22);
+    --rule-soft:rgba(62,224,122,.12);
+  }
+  html,body{margin:0;padding:0;background:#000;}
+  body{
+    font-family:'JetBrains Mono', ui-monospace, monospace;
+    color:var(--ink);
+    display:flex; align-items:flex-start; justify-content:center;
+    min-height:100vh; padding:24px; box-sizing:border-box;
+  }
+
+  .page{
+    width:1123px; height:794px;
+    background: #070a09;
+    position:relative; overflow:hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(62,224,122,.14) inset;
+  }
+
+  /* corner brackets only — subtle frame, no animated chrome */
+  .bracket{
+    position:absolute; width:26px; height:26px;
+    border:1.5px solid var(--green);
+  }
+  .bracket.tl{ top:30px; left:30px; border-right:none; border-bottom:none; }
+  .bracket.tr{ top:30px; right:30px; border-left:none; border-bottom:none; }
+  .bracket.bl{ bottom:30px; left:30px; border-right:none; border-top:none; }
+  .bracket.br{ bottom:30px; right:30px; border-left:none; border-top:none; }
+
+  /* faint inner rule, single line */
+  .inner{
+    position:absolute; inset:46px;
+    border:1px solid var(--rule-soft);
+  }
+
+  .body{
+    position:absolute; inset:64px;
+    display:grid;
+    grid-template-rows: auto auto 1fr auto auto;
+    gap: 0;
+  }
+
+  /* ── HEADER ── */
+  .header{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    gap: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .brand-left{display:flex; align-items:center; gap:14px;}
+  .brand-right{display:flex; align-items:center; gap:14px; justify-content:flex-end;}
+  .brand-left img{height:42px; width:auto; padding:8px 12px; box-sizing:content-box;}
+  .brand-right img{height:56px; width:auto;}
+  .brand-meta{
+    font-size:9.5px; letter-spacing:.18em; color:var(--ink-dim);
+    line-height:1.6; text-transform:uppercase;
+  }
+  .brand-meta b{color:var(--ink); font-weight:600;}
+
+  .doc-tag{
+    text-align:center;
+    font-size:9.5px; letter-spacing:.32em; color:var(--ink-dim);
+  }
+  .doc-tag .id{
+    display:block; font-size:11px; color:var(--green);
+    letter-spacing:.18em; margin-top:4px; font-weight:600;
+  }
+
+  /* ── TITLE ── */
+  .title-wrap{
+    text-align:center;
+    padding: 38px 0 32px;
+  }
+  .eyebrow{
+    font-size:10.5px; letter-spacing:.5em; color:var(--green);
+    margin-bottom: 14px;
+  }
+  h1.title{
+    margin: 0;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:44px;
+    letter-spacing:.24em;
+    color:var(--ink);
+    line-height:1;
+  }
+  h1.title .accent{ color:var(--green); }
+  .subtitle{
+    margin-top:14px;
+    font-size:11px; letter-spacing:.42em; color:var(--ink-dim);
+  }
+  .subtitle .sep{color:var(--green-soft); margin: 0 12px;}
+
+  /* ── MAIN ── */
+  .declar{
+    text-align:center;
+    font-size:13px; line-height:1.85; color:var(--ink);
+    max-width: 880px; margin: 0 auto;
+  }
+  .name{
+    display:block;
+    font-weight:700;
+    font-size:24px;
+    letter-spacing:.06em;
+    color:var(--green);
+    margin: 14px 0 16px;
+    white-space:nowrap;
+  }
+  .course{ color:var(--ink); font-weight:600; }
+  .declar b{ color:var(--ink); font-weight:600; }
+
+  /* ── GRADE ── */
+  .grade{
+    margin: 26px auto 0;
+    text-align:center;
+    font-size:12px;
+    letter-spacing:.18em;
+    color:var(--ink);
+    text-transform:uppercase;
+  }
+  .grade .label{
+    display:block;
+    font-size:9px; letter-spacing:.32em; color:var(--green);
+    margin-bottom: 10px;
+  }
+  .grade .sep{
+    color:var(--green); margin: 0 14px;
+    font-weight:700;
+  }
+
+  /* ── FOOTER ── */
+  .footer{
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule-soft);
+    display:grid;
+    grid-template-columns: 1fr 1fr 1.1fr 1.1fr;
+    gap: 22px;
+    align-items:end;
+  }
+  .sig{ text-align:center; padding: 0 6px;}
+  .sig .line{
+    border-top:1px solid var(--ink-dim);
+    margin: 0 0 8px;
+  }
+  .sig .name-s{
+    font-size:10.5px; color:var(--ink); letter-spacing:.06em; font-weight:600;
+  }
+  .sig .role{
+    font-size:8.5px; color:var(--ink-dim);
+    letter-spacing:.2em; margin-top:3px;
+  }
+  .sig .id-line{
+    font-size:8.5px; color:var(--ink-mute);
+    letter-spacing:.1em; margin-top:6px;
+  }
+
+  .auth{
+    display:grid;
+    grid-template-columns: 64px 1fr;
+    gap:12px;
+    align-items:center;
+  }
+  .qr{
+    width:64px; height:64px;
+    background:#000;
+    padding:3px;
+    border:1px solid var(--green);
+    box-sizing:border-box;
+  }
+  .qr img, .qr svg{display:block; width:100%; height:100%;}
+  .auth .lbl{font-size:8.5px; letter-spacing:.26em; color:var(--ink-dim);}
+  .auth .id{font-size:13px; letter-spacing:.08em; color:var(--green); font-weight:700; margin-top:3px;}
+  .auth .hash{font-size:8.5px; letter-spacing:.04em; color:var(--ink-dim); word-break:break-all; margin-top:5px; line-height:1.5;}
+
+  .emitter{
+    font-size:9.5px; line-height:1.6; color:var(--ink-dim);
+    letter-spacing:.06em;
+    text-align:right;
+  }
+  .emitter .tag{
+    display:block; color:var(--green);
+    letter-spacing:.26em; margin-bottom:5px; font-size:8.5px;
+  }
+  .emitter b{color:var(--ink); font-weight:600;}
+
+  /* ── LEGAL BASE ── */
+  .legal{
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule-soft);
+    font-size:8.5px;
+    line-height:1.55;
+    color:var(--ink-mute);
+    letter-spacing:.04em;
+    text-align:center;
+    max-width: 920px;
+    margin-left:auto; margin-right:auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="bracket tl"></div>
+  <div class="bracket tr"></div>
+  <div class="bracket bl"></div>
+  <div class="bracket br"></div>
+  <div class="inner"></div>
+
+  <div class="body">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="brand-left">
+        <img src="assets/logo-MLC-alt.svg" alt="Movimento Luta de Classes">
+        <div class="brand-meta">
+          <b>Movimento Luta de Classes</b><br>
+          Corrente sindical que organiza a classe trabalhadora
+        </div>
+      </div>
+
+      <div class="doc-tag">
+        DOCUMENTO OFICIAL
+        <span class="id">[ CERT · {{ certificado_numero }} ]</span>
+      </div>
+
+      <div class="brand-right">
+        <div class="brand-meta" style="text-align:right;">
+          <b>Núcleo TI</b><br>
+          tecnologia a serviço da<br>classe trabalhadora
+        </div>
+        <img src="assets/tux-engrenagem.svg" alt="Núcleo TI">
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="title-wrap">
+      <div class="eyebrow">// FORMAÇÃO POPULAR EM TECNOLOGIA</div>
+      <h1 class="title">CERTIFICADO <span class="accent">DE CONCLUSÃO</span></h1>
+      <div class="subtitle">SEGURANÇA<span class="sep">/</span>DIGITAL</div>
+    </div>
+
+    <!-- DECLARAÇÃO -->
+    <div class="declar">
+      Certificamos que
+      <span class="name">{{ aluno_nome }}</span>
+      concluiu com êxito o curso livre de
+      <span class="course">{{ curso_nome }}</span>,
+      realizado em <b>{{ data_curso }}</b>,
+      com <br> carga horária total de <b>{{ carga_horaria }}</b>.
+    </div>
+
+    <!-- GRADE CURRICULAR -->
+    <div class="grade">
+      <span class="label">// GRADE CURRICULAR</span>
+      Criptografia<span class="sep">·</span>Armazenamento<span class="sep">·</span>Internet<span class="sep">·</span>Ecossistemas Digitais
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+
+      <div class="sig">
+        <div class="line"></div>
+        <div class="name-s">{{ professor1_nome }}</div>
+        <div class="role">{{ professor1_cargo }}</div>
+        <div class="id-line">CPF {{ professor1_cpf }}</div>
+      </div>
+
+      <div class="sig">
+        <div class="line"></div>
+        <div class="name-s">{{ professor2_nome }}</div>
+        <div class="role">{{ professor2_cargo }}</div>
+        <div class="id-line">CPF {{ professor2_cpf }}</div>
+      </div>
+
+      <div class="auth">
+        <div class="qr" aria-label="QR code de autenticidade">
+          <img src="{{ qr_code_src }}" alt="QR de verificação">
+        </div>
+        <div>
+          <div class="lbl">CERTIFICADO Nº</div>
+          <div class="id">{{ certificado_numero }}</div>
+          <div class="hash">verifique em<br>seu smartphone</div>
+        </div>
+      </div>
+
+      <div class="emitter">
+        <span class="tag">// EMISSOR</span>
+        <b>{{ emissor_nome }}</b><br>
+        {{ emissor_local }} · emitido em {{ data_emissao }}
+      </div>
+
+    </div>
+
+    <!-- LEGAL BASE -->
+    <div class="legal">
+      Certificado emitido em conformidade com a Lei nº 9.394/96 (Diretrizes e Bases da Educação Nacional)
+      e o Decreto Presidencial nº 5.154/04. Curso classificado como livre, de formação inicial ou qualificação profissional.
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
