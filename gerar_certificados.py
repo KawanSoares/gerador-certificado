@@ -11,11 +11,27 @@ import segno
 from jinja2 import Environment, FileSystemLoader
 from playwright.sync_api import sync_playwright
 
-parser = argparse.ArgumentParser(description="Gera certificados PNG a partir de alunos.csv")
+parser = argparse.ArgumentParser(description="Gera certificados a partir de alunos.csv")
 parser.add_argument(
     "--keep-tmp",
     action="store_true",
     help="Mantém os HTMLs temporários em tmp/ após a geração (padrão: apagar)",
+)
+parser.add_argument(
+    "--format",
+    choices=["pdf", "png", "jpg", "webp"],
+    default="pdf",
+    help="Formato do arquivo de saída (padrão: pdf)",
+)
+parser.add_argument(
+    "--scale",
+    type=float,
+    default=None,
+    help=(
+        "Fator de escala de saída. "
+        "Raster (png/jpg/webp): device_scale_factor inteiro, padrão 3 (~300 DPI). "
+        "PDF: multiplica papel e conteúdo, entre 0.1 e 2.0, padrão 1.0."
+    ),
 )
 args = parser.parse_args()
 
@@ -99,20 +115,47 @@ for i, aluno_nome in enumerate(alunos):
     tmp_file.write_text(rendered, encoding="utf-8")
 
     slug = slugify(aluno_nome)
-    out_name = f"certificado-{ano}-{seq:03d}-{slug}.png"
+    out_name = f"certificado-{ano}-{seq:03d}-{slug}.{args.format}"
     out_path = OUT / out_name
 
     html_files.append((tmp_file, aluno_nome, certificado_numero, out_path))
 
+is_pdf = args.format == "pdf"
+
+if is_pdf:
+    pdf_scale = args.scale if args.scale is not None else 1.0
+    if not (0.1 <= pdf_scale <= 2.0):
+        parser.error(f"--scale para PDF deve ser entre 0.1 e 2.0 (recebido: {pdf_scale})")
+else:
+    raster_scale = int(args.scale) if args.scale is not None else 3
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     for tmp_file, aluno_nome, certificado_numero, out_path in html_files:
-        page = browser.new_page(
-            viewport={"width": 1123, "height": 794}, device_scale_factor=3
-        )
+        page_kwargs = {"viewport": {"width": 1123, "height": 794}}
+        if not is_pdf:
+            page_kwargs["device_scale_factor"] = raster_scale
+        page = browser.new_page(**page_kwargs)
         page.goto(f"file://{tmp_file.resolve()}")
         page.wait_for_load_state("networkidle")
-        page.locator(".page").screenshot(path=str(out_path))
+        if is_pdf:
+            # body tem padding:24px e min-height:100vh para exibição no browser;
+            # sem esse reset o conteúdo fica 842px e estoura para uma segunda página.
+            page.add_style_tag(content=(
+                "@page{margin:0}"
+                "@media print{body{padding:0;margin:0;min-height:0;display:block}}"
+            ))
+            page.pdf(
+                path=str(out_path),
+                width=f"{round(1123 * pdf_scale)}px",
+                height=f"{round(794 * pdf_scale)}px",
+                print_background=True,
+                margin={"top": "0", "right": "0", "bottom": "0", "left": "0"},
+                scale=pdf_scale,
+            )
+        else:
+            playwright_type = "jpeg" if args.format == "jpg" else args.format
+            page.locator(".page").screenshot(path=str(out_path), type=playwright_type)
         page.close()
         print(f"✓ {certificado_numero} — {aluno_nome} → {out_path.relative_to(ROOT)}")
     browser.close()

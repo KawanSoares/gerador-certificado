@@ -1,6 +1,6 @@
 # Gerador de Certificados — Núcleo TI / MLC
 
-Script Python que gera certificados de conclusão em PNG a partir de uma lista de alunos em CSV, renderizando um template HTML com Jinja2 e exportando via Playwright.
+Script Python que gera certificados de conclusão em PDF, PNG, JPG ou WebP a partir de uma lista de alunos em CSV, renderizando um template HTML com Jinja2 e exportando via Playwright.
 
 ## Pré-requisitos
 
@@ -22,12 +22,19 @@ playwright install chromium
 ├── assets/
 │   ├── luta-de-classes-full.png   # logo MLC
 │   └── tux-engrenagem.svg         # logo Núcleo TI
-├── alunos.csv                     # lista de alunos (coluna: nome)
-├── config.json                    # dados do curso e emissor
+├── alunos.csv.example             # exemplo de lista de alunos
+├── config.json.example            # exemplo de configuração
 └── gerar_certificados.py          # script principal
 ```
 
+> Copie os arquivos `.example` removendo o sufixo antes de usar.
+
 ## Configuração
+
+```bash
+cp config.json.example config.json
+cp alunos.csv.example alunos.csv
+```
 
 ### `config.json`
 
@@ -72,16 +79,29 @@ Camarada João da Silva
 python gerar_certificados.py
 ```
 
-Por padrão, os HTMLs intermediários em `tmp/` são apagados ao final. Para preservá-los:
+Por padrão, gera PDFs e apaga os HTMLs intermediários em `tmp/` ao final.
+
+### Parâmetros
+
+| Parâmetro | Valores | Padrão | Descrição |
+|-----------|---------|--------|-----------|
+| `--format` | `pdf`, `png`, `jpg`, `webp` | `pdf` | Formato do arquivo de saída |
+| `--scale` | número | `3` (raster) / `1.0` (PDF) | Raster: `device_scale_factor` inteiro (ex.: `3` ≈ 300 DPI). PDF: multiplica papel e conteúdo proporcionalmente, entre `0.1` e `2.0`. |
+| `--keep-tmp` | — | — | Mantém os HTMLs intermediários em `tmp/` após a geração |
+
+### Exemplos
 
 ```bash
-python gerar_certificados.py --keep-tmp
+python gerar_certificados.py                        # PDF (padrão)
+python gerar_certificados.py --format png           # PNG 3× (≈ 300 DPI)
+python gerar_certificados.py --format jpg --scale 2 # JPG menor
+python gerar_certificados.py --format webp --scale 4 --keep-tmp
 ```
 
 Os certificados são salvos em `out/` com o formato:
 
 ```
-out/certificado-2026-001-camarada-joana-da-silva-pereira.png
+out/certificado-2026-001-camarada-joana-da-silva-pereira.pdf
 ```
 
 Cada certificado inclui um QR code com os dados básicos do aluno para verificação offline.
