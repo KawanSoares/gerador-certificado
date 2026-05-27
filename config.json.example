@@ -3,13 +3,13 @@
   "data_curso": "17/05/2026",
   "carga_horaria": "2 (duas) horas",
 
-  "professor1_nome": "",
-  "professor1_cargo": "",
-  "professor1_cpf": "",
+  "professor1_nome": "Master Blaster Instructor",
+  "professor1_cargo": "INSTRUTOR NÚCLEO TI",
+  "professor1_cpf": "000.000.000-00",
 
-  "professor2_nome": "",
-  "professor2_cargo": "",
-  "professor2_cpf": "",
+  "professor2_nome": "Master Blaster Instructor",
+  "professor2_cargo": "INSTRUTORA NÚCLEO TI",
+  "professor2_cpf": "000.000.000-00",
 
   "emissor_nome": "Movimento Luta de Classes",
   "emissor_local": "Florianópolis / SC",
